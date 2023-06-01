@@ -44,7 +44,7 @@ class ChatWindow:
         master.title("Chatbot")
 
         # Set default API key
-        self.default_api_key = "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"
+        self.default_api_key = "OPENAI_API_KEY"
         os.environ["OPENAI_API_KEY"] = self.default_api_key
 
         # Create button to change API key
@@ -123,15 +123,3 @@ class ChatWindow:
 root = tk.Tk()
 chat_window = ChatWindow(root)
 root.mainloop()
-
-# os.environ["OPENAI_API_KEY"]='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'
-# response = chatbot.query("You are now playing the role of an electrochemistry expert and need to help me analyze electrochemical impedance data. We are testing the impedance of a lithium-ion battery and the equivalent circuit obtained is 'p(R_0,CPE_0)-p(R_1,CPE_1)-p(R_2,CPE_2)'. Please analyze this result.")
-#We are testing the impedance of a 'lithium-ion battery' and the equivalent circuit obtained is 'p(R_0,CPE_0)-p(R_1,CPE_1)-p(R_2,CPE_2)'.
-# R_0 = 1.13e+01  (+/- 1.13e+06) [Ohm]
-# CPE_0_0 = 1.49e+01  (+/- 8.82e+03) [Ohm^-1 sec^a]
-# CPE_0_1 = 2.94e-30  (+/- 4.62e-03) []
-# R_1 = 9.08e-02  (+/- 3.94e-02) [Ohm]
-# CPE_1_0 = 3.68e+02  (+/- 8.10e+01) [Ohm^-1 sec^a]
-# CPE_1_1 = 1.00e+00  (+/- 1.00e+00) []
-
-# The sample is "lithium-ion battery" and the equivalent circuit obtained is "p(R_0,CPE_0)-p(R_1,CPE_1)-p(R_2,CPE_2)"
