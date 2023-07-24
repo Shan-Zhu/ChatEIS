@@ -1,6 +1,6 @@
 # coding: utf-8
 
-'''Part of the code refers to impedance.py(doi = {10.21105/joss.02349}) and AutoECM (doi = {10.1149/1945-7111/acd8fb})'''
+'''Part of the code refers to impedance.py (doi = {10.21105/joss.02349}) and AutoECM (doi = {10.1149/1945-7111/acd8fb})'''
 
 import matplotlib.pyplot as plt
 from impedance.preprocessing import readFile
