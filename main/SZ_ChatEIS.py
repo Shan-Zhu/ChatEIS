@@ -1,10 +1,7 @@
-
-
 import tkinter as tk
 import os
 import gradio as gr
-from llama_index import SimpleDirectoryReader, GPTVectorStoreIndex, LLMPredictor, PromptHelper, ServiceContext, \
-    StorageContext, load_index_from_storage
+from llama_index import SimpleDirectoryReader, GPTVectorStoreIndex, LLMPredictor, PromptHelper, ServiceContext, StorageContext, load_index_from_storage
 from llama_index.node_parser import SimpleNodeParser
 from langchain.chat_models import ChatOpenAI
 
@@ -12,10 +9,10 @@ class ChatEIS:
     def __init__(self, documents_dir, persist_dir):
         self.documents_dir = documents_dir
         self.persist_dir = persist_dir
-        self.llm_predictor = LLMPredictor(llm=ChatOpenAI(model_name="gpt-3.5-turbo"))  #temperature=0,
+        self.llm_predictor = LLMPredictor(llm=ChatOpenAI(model_name="gpt-3.5-turbo",temperature=1))
         self.max_input_size = 4096
-        self.num_output = 256
-        self.max_chunk_overlap = 20
+        self.num_output = 4096
+        self.max_chunk_overlap = 50
         self.prompt_helper = PromptHelper(self.max_input_size, self.num_output, self.max_chunk_overlap)
         self.service_context = ServiceContext.from_defaults(llm_predictor=self.llm_predictor,
                                                             prompt_helper=self.prompt_helper)
@@ -44,7 +41,7 @@ class ChatWindow:
         master.title("Chatbot")
 
         # Set default API key
-        self.default_api_key = "OPENAI_API_KEY"
+        self.default_api_key = '...'
         os.environ["OPENAI_API_KEY"] = self.default_api_key
 
         # Create button to change API key
@@ -56,7 +53,8 @@ class ChatWindow:
         self.text_label.pack()
         self.text_entry = tk.Entry(master, width=50)
         self.text_entry.pack(fill=tk.BOTH, expand=True)
-        self.text_entry.insert(tk.END, "We are testing the impedance of a 'lithium-ion battery' and the equivalent circuit obtained is 'p(R_0,CPE_0)-p(R_1,CPE_1)-p(R_2,CPE_2)'")
+        self.text_entry.insert(tk.END, "Please analyze the following information and provide your expert insights.")
+
 
         # Create button to submit question
         self.submit_button = tk.Button(master, text="Submit", command=self.submit_question)
@@ -107,15 +105,11 @@ class ChatWindow:
 
     def submit_question(self):
         question = self.text_entry.get()
-        question = "You are now playing the role of an electrochemistry expert. Please analyze the following information and provide your expert insights." + question
-
         chatbot = ChatEIS('eis_doc', 'index_storage')
         response = chatbot.query(question)
         self.response_text.delete(1.0, tk.END)
         self.response_text.insert(tk.END, response)
-
-        # Add question and response to history
-        history_question = question.replace("You are now playing the role of an electrochemistry expert. Please analyze the following information and provide your expert insights.", "")
+        history_question = question
         history_text = f"Question: {history_question}\nResponse: {response}\n\n"
         self.history_text.insert(tk.END, history_text)
 
