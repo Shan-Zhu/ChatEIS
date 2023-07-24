@@ -4,46 +4,38 @@ import numpy as np
 import pandas as pd
 import sklearn as sk
 from xgboost import XGBClassifier
-from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV
+from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV, ParameterGrid
 from sklearn.metrics import f1_score,accuracy_score
 
-data_input = pd.read_csv('eis_all_data.csv', sep=',')
+data_input = pd.read_csv('eis_all_data-20.csv', sep=',')
 
-labels = data_input['label']
-features = data_input.drop('label', axis=1)
+labels = data_input['Type']
+features = data_input.drop('Type', axis=1)
 
 X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2, random_state=0)
 
-XGB = XGBClassifier(learning_rate=0.05, max_depth=6, n_estimators=500)
+param_grid = {
+    'n_estimators': [50, 100, 200, 300, 400, 500, 600, 700, 800, 900,1000],
+    'max_depth': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    'learning_rate': [0.5, 0.2, 0.1, 0.05, 0.02, 0.01]
+}
 
-# XGB.fit(X_train, y_train)
-# XGB.save_model('XGB_model.model')
+XGB = XGBClassifier()
 
-# 加载模型
-loaded_model = XGBClassifier()
-loaded_model.load_model('XGB_model.model')
+results_df = pd.DataFrame(columns=['n_estimators', 'max_depth', 'learning_rate', 'mean_test_score'])
 
-y_pred = loaded_model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-# 在测试集上进行预测并计算准确率
-y_pred_prob = loaded_model.predict_proba(X_test)
-# 获取概率最高的三个类别的索引和概率值
-top_3_indices = y_pred_prob.argsort()[:, -3:][:, ::-1]
-top_3_labels = [loaded_model.classes_[i] for i in top_3_indices]
-top_3_probs = [y_pred_prob[j][i] for j, i in enumerate(top_3_indices)]
-# 将结果存储在 Pandas DataFrame 中
-output = pd.DataFrame({'y_test': y_test, 'y_pred':y_pred, 'y_pred_top3': top_3_labels})
-# 检验正确结果是否存在于这三个结果之中，如果存在，将“1”存入“对比”列，如果不存在，将“0”存入“对比”列
-output['Top3_results'] = output.apply(lambda row: 1 if row['y_test'] in row['y_pred_top3'] else 0, axis=1)
+for i, params in enumerate(ParameterGrid(param_grid)):
+    print(f'Running GridSearchCV {i + 1}/{len(ParameterGrid(param_grid))}...')
+    XGB.set_params(**params)
+    grid_search = GridSearchCV(XGB, param_grid={},
+                               cv=5, n_jobs=4, verbose=1, scoring='accuracy')
+    grid_search.fit(X_train, y_train)
 
-# 将结果存储在'XGB_prediction.csv'
-output.to_csv('XGB_prediction_Top3.csv', index=False)
+    results_df = results_df.append({
+        'n_estimators': params['n_estimators'],
+        'max_depth': params['max_depth'],
+        'learning_rate': params['learning_rate'],
+        'mean_test_score': grid_search.best_score_
+    }, ignore_index=True)
 
-'''
-# 在测试集上进行预测并计算准确率
-y_pred = loaded_model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-print("Accuracy on test data:", accuracy)
-output = pd.DataFrame({'y_test': y_test, 'y_pred': y_pred})
-output.to_csv('XGB_prediction.csv', index=False)
-'''
+results_df.to_csv('grid_search_results.csv', index=False) 
