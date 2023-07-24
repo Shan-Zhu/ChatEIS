@@ -17,7 +17,7 @@ from sklearn.model_selection import train_test_split,cross_val_score,KFold
 from sklearn.metrics import f1_score
 
 # input data
-data_input=pd.read_csv('eis_all_data.csv', sep=',')
+data_input=pd.read_csv('eis_all_data-20.csv', sep=',')
 
 labels=data_input['label']
 features=data_input.drop('label', axis=1)
